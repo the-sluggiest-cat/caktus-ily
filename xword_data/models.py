@@ -1,6 +1,9 @@
 from django.db import models
 import datetime
 
+# S: almost pregenerated... it wasn't, but it looks like it, don't it?
+# hehe. im good.
+
 class Entry(models.Model):
     entry_text: models.CharField = models.CharField(max_length=50, unique=True)
 
