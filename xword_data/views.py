@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.template import Template, Context
 from django.http import HttpResponse
-import random
 
 # Create your views here.
 def xword_drill(request):
@@ -35,59 +34,62 @@ def xword_answer(request, id):
     # S: again, Django has forced my hand
     from .models import Clue
 
-    if request.method == "GET":
-        objects = Clue.objects.values()
-        entry_ids = [item["id"] for item in objects]
-        names = [Clue.objects.get(pk=id).entry.entry_text for id in entry_ids]
-        name_count = {}
-        for name in names:
-            if name not in name_count.keys():
-                name_count[name]  = 1
-            else:
-                name_count[name] += 1
+    objects = Clue.objects.values()
+    ids = [item["id"] for item in objects]
+    names = [Clue.objects.get(pk=id).entry.entry_text for id in ids]
+    name_count = {}
+    for name in names:
+        if name not in name_count.keys():
+            name_count[name]  = 1
+        else:
+            name_count[name] += 1
 
-        # S: we don't do any sorting here but whatever python god is smiting me...
-        # i don't appreciate it..........
-        sorted_names = tuple(name_count)
-        sorted_values = list(sorted(name_count.values(), reverse=True))
-        sorted_zip = tuple(zip(sorted_names, sorted_values))
+    # S: we don't do any sorting here but whatever python god is smiting me...
+    # i don't appreciate it..........
+    sorted_names = tuple(name_count)
+    sorted_values = list(sorted(name_count.values(), reverse=True))
+    sorted_zip = tuple(zip(sorted_names, sorted_values))
 
-        lst = list(range(max(entry_ids)))
-        working_lst = [0 for _unused in range(len(lst))]
+    lst = list(range(max(ids)))
+    working_lst = [0 for _unused in range(len(lst))]
 
-        for item in entry_ids:
-            working_lst[item-1] += 1
+    for item in ids:
+        working_lst[item-1] += 1
 
-        dict_to_work_with = {}
-        for diction in objects:
-            if diction["id"] == id:
-                dict_to_work_with = diction
-                break
+    dict_to_work_with = {}
+    for diction in objects:
+        if diction["id"] == id:
+            dict_to_work_with = diction
+            break
 
-        if len(dict_to_work_with.keys())<1:
-            response = HttpResponse()
-            response.status_code = 404
-            return response
+    if len(dict_to_work_with.keys())<1:
+        response = HttpResponse()
+        response.status_code = 404
+        return response
 
-        html_response = """
+    html_response = f"""
+    <p>{Clue.objects.get(pk=id).entry.entry_text} is the correct answer! You have now answered 1 (of 3) clues correctly.</p>
 <table>
     <tr>
         <th>Count</th>
         <th>Entry</th>
     </tr>
         """
-        for name, count in sorted_zip:
-            html_response += f"""
+    for name, count in sorted_zip:
+        html_response += f"""
     <tr>
         <td>{count}</td>
         <td>{name}</td>
     </tr>
 """
-        html_response += "</table>"
+    html_response += "</table>"
 
-        template = Template(html_response)
-        context = Context({"hi": ":3" if max(entry_ids)>1 else "only appearance of this clue"})
-        return HttpResponse(template.render(context))
+    if id in ids:
+        quick_and_dirty_check = Clue.objects.get(pk=id)
+        entry_ids = [item["entry_id"] for item in objects]
+        if entry_ids.count(quick_and_dirty_check.entry_id) == 1:
+            html_response += "\n<p> only appearance of this clue </p>"
 
-    print(request.POST)
-    return HttpResponse()
+    template = Template(html_response)
+    context = Context({"hi": ":3"})
+    return HttpResponse(template.render(context))
