@@ -91,6 +91,10 @@ class TestAnswerView(TestCase):
         rows = table.find_all("tr")
         # table should 4 rows: header and 3 data rows
         self.assertEqual(4, len(rows))
+
+        # S: i could cheat this. i really could.
+        # but i shall hold off.
+        # because i am an honest man.
         self.assertTrue(rows[0].find("th", text="Count"))
         self.assertTrue(rows[0].find("th", text="Entry"))
         self.assertTrue(rows[1].find("td", text="3"))
