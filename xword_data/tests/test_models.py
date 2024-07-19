@@ -5,6 +5,11 @@ from .factories import ClueFactory, EntryFactory, PuzzleFactory
 
 class TestXWordModels(TestCase):
 
+    # S: using "str()" to get the repr is a bad idea
+    # consider using "repr()" instead, as it's unlikely to have
+    # been touched in any way by the developer (compared to
+    # __str__())
+
     def test_clue(self):
         clue = ClueFactory()
         string_repr = str(clue)
